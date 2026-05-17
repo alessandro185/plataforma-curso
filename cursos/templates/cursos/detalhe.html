@@ -1,0 +1,91 @@
+{% extends "cursos/base.html" %}
+
+{% block title %}{{ curso.titulo }} · Plataforma de Cursos{% endblock %}
+
+{% block content %}
+{% with tab_ativa=abrir_inscricao|yesno:"inscricao,sobre" %}
+<div class="page-with-rail page-with-rail-detail">
+    <div class="page-primary">
+        <nav class="breadcrumb" aria-label="Navegação estrutural">
+            <a href="{% url 'cursos:lista' %}">Catálogo</a>
+            <span aria-hidden="true"> / </span>
+            <span>{{ curso.titulo }}</span>
+        </nav>
+
+        <article class="detail-article">
+            <header class="detail-header">
+                <h1 class="detail-title">{{ curso.titulo }}</h1>
+                <div class="chips">
+                    <span class="chip"><strong>Nível</strong> {{ curso.get_nivel_display }}</span>
+                    <span class="chip"><strong>Carga horária</strong> {{ curso.carga_horaria }} h</span>
+                    <span class="chip"><strong>Atualizado</strong> {{ curso.data_criacao|date:"d/m/Y" }}</span>
+                </div>
+            </header>
+            <div class="prose">
+                {{ curso.descricao|linebreaks }}
+            </div>
+        </article>
+    </div>
+
+    <aside
+        class="rail rail-sticky"
+        id="inscricao"
+        data-tabs
+        data-initial-tab="{{ tab_ativa }}"
+        aria-label="Informações do curso e inscrição"
+    >
+        <div class="tablist" role="tablist" aria-orientation="horizontal">
+            <button type="button" class="tab-btn{% if tab_ativa == 'sobre' %} is-active{% endif %}" role="tab" id="tab-det-sobre" aria-selected="{% if tab_ativa == 'sobre' %}true{% else %}false{% endif %}" aria-controls="panel-det-sobre" data-tab="sobre"{% if tab_ativa != 'sobre' %} tabindex="-1"{% endif %}>Sobre</button>
+            <button type="button" class="tab-btn{% if tab_ativa == 'inscricao' %} is-active{% endif %}" role="tab" id="tab-det-inscricao" aria-selected="{% if tab_ativa == 'inscricao' %}true{% else %}false{% endif %}" aria-controls="panel-det-inscricao" data-tab="inscricao"{% if tab_ativa != 'inscricao' %} tabindex="-1"{% endif %}>Inscrever-se</button>
+            <button type="button" class="tab-btn{% if tab_ativa == 'relacionados' %} is-active{% endif %}" role="tab" id="tab-det-rel" aria-selected="{% if tab_ativa == 'relacionados' %}true{% else %}false{% endif %}" aria-controls="panel-det-rel" data-tab="relacionados"{% if tab_ativa != 'relacionados' %} tabindex="-1"{% endif %}>Relacionados</button>
+        </div>
+        <div class="rail-panel-wrap">
+            <div class="rail-panel{% if tab_ativa == 'sobre' %} is-active{% endif %}" id="panel-det-sobre" role="tabpanel" aria-labelledby="tab-det-sobre" data-panel="sobre"{% if tab_ativa != 'sobre' %} hidden{% endif %}>
+                <p class="rail-kicker">Carga horária</p>
+                <div class="big-hours">{{ curso.carga_horaria }} h</div>
+                <p class="rail-muted stack-tight">
+                    Este painel resume o curso. A inscrição é feita na aba ao lado — os seus dados ficam registados para a equipa responsável.
+                </p>
+                <a class="btn btn-primary btn-wide" href="{% url 'cursos:lista' %}#catalogo">Voltar ao catálogo</a>
+            </div>
+
+            <div class="rail-panel{% if tab_ativa == 'inscricao' %} is-active{% endif %}" id="panel-det-inscricao" role="tabpanel" aria-labelledby="tab-det-inscricao" data-panel="inscricao"{% if tab_ativa != 'inscricao' %} hidden{% endif %}>
+                <p class="rail-kicker">Inscrição</p>
+                <p class="rail-lead">Preencha os campos. Campos com * são obrigatórios.</p>
+                <form method="post" class="inscricao-form" novalidate>
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="form-errors" role="alert">{{ form.non_field_errors }}</div>
+                    {% endif %}
+                    {% for field in form %}
+                        <div class="field{% if field.errors %} field-error{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<span class="req" aria-hidden="true"> *</span>{% endif %}</label>
+                            {{ field }}
+                            {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+                            {% if field.help_text %}<p class="helptext">{{ field.help_text }}</p>{% endif %}
+                        </div>
+                    {% endfor %}
+                    <button type="submit" class="btn btn-primary btn-wide">Enviar inscrição</button>
+                </form>
+            </div>
+
+            <div class="rail-panel{% if tab_ativa == 'relacionados' %} is-active{% endif %}" id="panel-det-rel" role="tabpanel" aria-labelledby="tab-det-rel" data-panel="relacionados"{% if tab_ativa != 'relacionados' %} hidden{% endif %}>
+                <p class="rail-kicker">Também pode gostar</p>
+                {% if outros_cursos %}
+                    <ul class="side-list side-list-tight">
+                        {% for o in outros_cursos %}
+                            <li>
+                                <a href="{{ o.get_absolute_url }}">{{ o.titulo }}</a>
+                                <span class="rail-meta">{{ o.carga_horaria }} h · {{ o.get_nivel_display }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="rail-muted">Não há outros cursos ativos no momento.</p>
+                {% endif %}
+            </div>
+        </div>
+    </aside>
+</div>
+{% endwith %}
+{% endblock %}

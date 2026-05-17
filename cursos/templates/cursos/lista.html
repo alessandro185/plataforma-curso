@@ -1,0 +1,112 @@
+{% extends "cursos/base.html" %}
+
+{% block title %}Catálogo · Plataforma de Cursos{% endblock %}
+
+{% block content %}
+<div class="page-with-rail">
+    <div class="page-primary">
+        <section class="hero" aria-labelledby="titulo-catalogo">
+            <h1 id="titulo-catalogo">Aprenda no seu ritmo</h1>
+            <p class="lead">
+                Catálogo pensado para leitura rápida: nível, carga horária e descrição clara.
+                Escolha um curso, veja os detalhes e inscreva-se em segundos — sem ruído visual.
+            </p>
+            <div class="stats" role="group" aria-label="Resumo do catálogo">
+                <div class="stat">
+                    <strong>{{ total_cursos }}</strong>
+                    <span>cursos ativos</span>
+                </div>
+                <div class="stat">
+                    <strong>{{ total_horas }} h</strong>
+                    <span>carga horária total</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="catalogo" class="catalog-block" aria-labelledby="secao-cursos">
+            <div class="section-title">
+                <h2 id="secao-cursos">Catálogo</h2>
+                <p class="hint">Abra o curso para ver o programa completo e o formulário de inscrição.</p>
+            </div>
+
+            {% if cursos %}
+                <div class="course-grid">
+                    {% for curso in cursos %}
+                        <article class="card">
+                            <div class="card-top">
+                                <span class="pill pill-nivel-{{ curso.nivel }}">{{ curso.get_nivel_display }}</span>
+                                <span class="horas" title="Carga horária">{{ curso.carga_horaria }} h</span>
+                            </div>
+                            <h3><a href="{{ curso.get_absolute_url }}">{{ curso.titulo }}</a></h3>
+                            <div class="card-body">
+                                <p>{{ curso.descricao }}</p>
+                            </div>
+                            <div class="card-footer card-footer-split">
+                                <span class="meta">{{ curso.carga_horaria }} h · {{ curso.get_nivel_display }}</span>
+                                <div class="card-actions">
+                                    <a class="btn" href="{{ curso.get_absolute_url }}#inscricao">Inscrever-me</a>
+                                    <a class="btn btn-primary" href="{{ curso.get_absolute_url }}">Ver curso</a>
+                                </div>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">
+                    <p><strong>Catálogo em atualização.</strong></p>
+                    <p>Volte em breve — novos cursos serão publicados aqui.</p>
+                </div>
+            {% endif %}
+        </section>
+
+        <section id="como-funciona" class="trust-block" aria-labelledby="titulo-como">
+            <h2 id="titulo-como" class="trust-title">Como funciona a inscrição</h2>
+            <ol class="steps">
+                <li><span class="step-num">1</span> Escolha o curso no catálogo e abra a página de detalhes.</li>
+                <li><span class="step-num">2</span> No painel à direita, use a aba <strong>Inscrever-se</strong> e envie o formulário.</li>
+                <li><span class="step-num">3</span> Receberá confirmação na tela; o contacto por e-mail segue o fluxo da instituição.</li>
+            </ol>
+        </section>
+    </div>
+
+    <aside
+        class="rail rail-sticky"
+        data-tabs
+        data-initial-tab="visao"
+        aria-label="Informações e navegação rápida"
+    >
+        <div class="tablist" role="tablist" aria-orientation="horizontal">
+            <button type="button" class="tab-btn is-active" role="tab" id="tab-lista-visao" aria-selected="true" aria-controls="panel-lista-visao" data-tab="visao">Visão geral</button>
+            <button type="button" class="tab-btn" role="tab" id="tab-lista-links" aria-selected="false" aria-controls="panel-lista-links" data-tab="links" tabindex="-1">Acesso rápido</button>
+            <button type="button" class="tab-btn" role="tab" id="tab-lista-dicas" aria-selected="false" aria-controls="panel-lista-dicas" data-tab="dicas" tabindex="-1">Dicas</button>
+        </div>
+        <div class="rail-panel-wrap">
+            <div class="rail-panel is-active" id="panel-lista-visao" role="tabpanel" aria-labelledby="tab-lista-visao" data-panel="visao">
+                <p class="rail-kicker">Resumo</p>
+                <p class="rail-lead">{{ total_cursos }} cursos · {{ total_horas }} horas de conteúdo.</p>
+                <p class="rail-muted">Interface em tema escuro com foco em legibilidade e hierarquia. Use o catálogo à esquerda para explorar.</p>
+            </div>
+            <div class="rail-panel" id="panel-lista-links" role="tabpanel" aria-labelledby="tab-lista-links" data-panel="links" hidden>
+                <p class="rail-kicker">Cursos</p>
+                {% if cursos %}
+                    <ul class="rail-links">
+                        {% for curso in cursos %}
+                            <li><a href="{{ curso.get_absolute_url }}">{{ curso.titulo }}</a><span class="rail-meta">{{ curso.carga_horaria }} h</span></li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="rail-muted">Nenhum curso listado ainda.</p>
+                {% endif %}
+            </div>
+            <div class="rail-panel" id="panel-lista-dicas" role="tabpanel" aria-labelledby="tab-lista-dicas" data-panel="dicas" hidden>
+                <p class="rail-kicker">Experiência</p>
+                <ul class="rail-bullets">
+                    <li>Prefira preencher o e-mail que você usa no dia a dia.</li>
+                    <li>Na página do curso, o painel direito reúne resumo e inscrição.</li>
+                    <li>Use <kbd class="kbd">Tab</kbd> para navegar entre abas com o teclado.</li>
+                </ul>
+            </div>
+        </div>
+    </aside>
+</div>
+{% endblock %}

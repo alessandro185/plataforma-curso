@@ -1,0 +1,43 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Plataforma de Cursos{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..700;1,9..40,400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'cursos/plataforma.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<a class="skip" href="#conteudo">Ir para o conteúdo</a>
+<header class="site-header">
+    <div class="header-inner">
+        <a class="brand" href="{% url 'cursos:lista' %}">
+            <span class="brand-mark" aria-hidden="true">▣</span>
+            <span>Plataforma de Cursos</span>
+        </a>
+        <nav class="nav-actions" aria-label="Principal">
+            <a class="btn" href="{% url 'cursos:lista' %}#catalogo">Catálogo</a>
+            <a class="btn btn-ghost" href="{% url 'cursos:lista' %}#como-funciona">Como funciona</a>
+        </nav>
+    </div>
+</header>
+{% if messages %}
+    <div class="flash-stack" role="status" aria-live="polite">
+        {% for message in messages %}
+            <div class="flash {% if 'success' in message.tags %}flash-success{% elif 'error' in message.tags %}flash-error{% elif 'warning' in message.tags %}flash-warning{% else %}flash-info{% endif %}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+<main id="conteudo" class="shell">
+    {% block content %}{% endblock %}
+</main>
+<footer class="site-footer shell">
+    <p class="footer-line">Conteúdo para alunos · {% now "Y" %} · Privacidade e segurança em primeiro lugar.</p>
+</footer>
+<script src="{% static 'cursos/plataforma.js' %}" defer></script>
+</body>
+</html>
