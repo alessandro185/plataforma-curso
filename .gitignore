@@ -26,7 +26,6 @@ db.sqlite3
 db.sqlite3-journal
 /media
 /static
-/staticfiles
 
 # Virtual Environment
 venv/
@@ -46,3 +45,5 @@ Thumbs.db
 
 # Environment variables
 .env
+.vercel
+.env*

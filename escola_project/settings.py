@@ -1,15 +1,27 @@
 """Configurações do Django para escola_project."""
 
+import os
+import shutil
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Em produção, use variável de ambiente (ex.: python-dotenv) e nunca commite segredos.
-SECRET_KEY = "django-insecure-dev-apenas-local-altere-em-producao"
+# Em produção, use variável de ambiente
+SECRET_KEY = (
+    os.environ.get("DJANGO_SECRET_KEY")
+    or os.environ.get("SECRET_KEY")
+    or "django-insecure-dev-apenas-local-altere-em-producao"
+)
 
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False").lower() in ("true", "1", "t")
 
-ALLOWED_HOSTS: list[str] = ["127.0.0.1", "localhost", "testserver"]
+ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.vercel.app",
+    "http://127.0.0.1",
+    "http://localhost",
+]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -23,6 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -51,12 +64,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "escola_project.wsgi.application"
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+# Configuração de Banco de Dados (Suporta Postgres/Supabase/Neon via DATABASE_URL ou SQLite)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+if DATABASE_URL:
+    DATABASES = {
+        "default": dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    # No Vercel sem Postgres externo, usa /tmp para permitir escrita no SQLite
+    if os.environ.get("VERCEL"):
+        db_path = "/tmp/db.sqlite3"
+        local_db = BASE_DIR / "db.sqlite3"
+        if not os.path.exists(db_path) and os.path.exists(local_db):
+            try:
+                shutil.copyfile(local_db, db_path)
+            except Exception:
+                pass
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": db_path,
+            }
+        }
+    else:
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -74,13 +114,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = "pt-br"
-
 TIME_ZONE = "America/Sao_Paulo"
-
 USE_I18N = True
-
 USE_TZ = True
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
