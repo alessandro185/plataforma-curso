@@ -14,16 +14,45 @@
 
         <article class="detail-article">
             <header class="detail-header">
+                <div class="card-top" style="margin-bottom: 12px;">
+                    <span class="pill pill-nivel-{{ curso.nivel }}">{{ curso.get_nivel_display }}</span>
+                    {% if curso.categoria %}
+                        <span class="pill" style="border-color: rgba(255,255,255,0.2);">{{ curso.categoria.nome }}</span>
+                    {% endif %}
+                    {% if curso.destaque %}
+                        <span class="badge-destaque" style="position: static;">★ Destaque</span>
+                    {% endif %}
+                </div>
                 <h1 class="detail-title">{{ curso.titulo }}</h1>
                 <div class="chips">
-                    <span class="chip"><strong>Nível</strong> {{ curso.get_nivel_display }}</span>
-                    <span class="chip"><strong>Carga horária</strong> {{ curso.carga_horaria }} h</span>
-                    <span class="chip"><strong>Atualizado</strong> {{ curso.data_criacao|date:"d/m/Y" }}</span>
+                    <span class="chip"><strong>Carga horária:</strong> {{ curso.carga_horaria }} h</span>
+                    <span class="chip"><strong>Investimento:</strong> {{ curso.preco_display }}</span>
+                    {% if curso.avaliacao > 0 %}
+                        <span class="chip" title="{{ curso.avaliacao }}/5">
+                            <strong>Avaliação:</strong> ★ {{ curso.avaliacao }} ({{ curso.total_alunos }} alunos)
+                        </span>
+                    {% endif %}
+                    <span class="chip"><strong>Atualizado:</strong> {{ curso.data_criacao|date:"d/m/Y" }}</span>
                 </div>
             </header>
+
             <div class="prose">
                 {{ curso.descricao|linebreaks }}
             </div>
+
+            {% if curso.instrutor %}
+                <div class="trust-block" style="margin-top: 32px;">
+                    <h3 class="trust-title" style="margin-bottom: 8px;">Instrutor(a)</h3>
+                    <p style="margin: 0 0 6px; font-weight: 700; color: var(--text); font-size: 1.05rem;">
+                        {{ curso.instrutor.nome }}
+                    </p>
+                    {% if curso.instrutor.bio %}
+                        <p style="margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.5;">
+                            {{ curso.instrutor.bio }}
+                        </p>
+                    {% endif %}
+                </div>
+            {% endif %}
         </article>
     </div>
 
@@ -41,12 +70,18 @@
         </div>
         <div class="rail-panel-wrap">
             <div class="rail-panel{% if tab_ativa == 'sobre' %} is-active{% endif %}" id="panel-det-sobre" role="tabpanel" aria-labelledby="tab-det-sobre" data-panel="sobre"{% if tab_ativa != 'sobre' %} hidden{% endif %}>
+                <p class="rail-kicker">Investimento</p>
+                <div class="big-hours" style="font-size: 1.8rem; color: {% if not curso.preco %}var(--accent){% else %}var(--text){% endif %}; margin-bottom: 8px;">
+                    {{ curso.preco_display }}
+                </div>
                 <p class="rail-kicker">Carga horária</p>
                 <div class="big-hours">{{ curso.carga_horaria }} h</div>
                 <p class="rail-muted stack-tight">
-                    Este painel resume o curso. A inscrição é feita na aba ao lado — os seus dados ficam registados para a equipa responsável.
+                    Inscrições abertas com acesso imediato às aulas e certificado de conclusão.
                 </p>
-                <a class="btn btn-primary btn-wide" href="{% url 'cursos:lista' %}#catalogo">Voltar ao catálogo</a>
+                <button type="button" class="btn btn-primary btn-wide" onclick="document.getElementById('tab-det-inscricao').click()">
+                    Quero me inscrever →
+                </button>
             </div>
 
             <div class="rail-panel{% if tab_ativa == 'inscricao' %} is-active{% endif %}" id="panel-det-inscricao" role="tabpanel" aria-labelledby="tab-det-inscricao" data-panel="inscricao"{% if tab_ativa != 'inscricao' %} hidden{% endif %}>

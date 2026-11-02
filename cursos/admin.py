@@ -1,6 +1,18 @@
 from django.contrib import admin
 
-from .models import Curso, Inscricao
+from .models import Categoria, Curso, Inscricao, Instrutor
+
+
+@admin.register(Categoria)
+class CategoriaAdmin(admin.ModelAdmin):
+    list_display = ("nome", "slug")
+    prepopulated_fields = {"slug": ("nome",)}
+
+
+@admin.register(Instrutor)
+class InstrutorAdmin(admin.ModelAdmin):
+    list_display = ("nome",)
+    search_fields = ("nome",)
 
 
 class InscricaoInline(admin.TabularInline):
@@ -19,14 +31,21 @@ class CursoAdmin(admin.ModelAdmin):
         "titulo",
         "slug",
         "nivel",
+        "categoria",
+        "instrutor",
         "carga_horaria",
-        "data_criacao",
+        "avaliacao",
+        "total_alunos",
+        "preco",
+        "destaque",
         "ativo",
+        "data_criacao",
     )
-    list_filter = ("ativo", "nivel")
+    list_filter = ("ativo", "nivel", "destaque", "categoria")
     search_fields = ("titulo", "slug", "descricao")
     prepopulated_fields = {"slug": ("titulo",)}
-    ordering = ("titulo",)
+    ordering = ("-destaque", "titulo")
+    list_editable = ("ativo", "destaque")
     inlines = [InscricaoInline]
 
 

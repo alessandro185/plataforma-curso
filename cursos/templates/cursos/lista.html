@@ -1,112 +1,167 @@
 {% extends "cursos/base.html" %}
 
-{% block title %}Catálogo · Plataforma de Cursos{% endblock %}
+{% block title %}Catálogo de Cursos · Plataforma de Cursos{% endblock %}
+{% block meta_description %}Encontre o curso certo para você. Filtre por nível, categoria e ordenação para descobrir o melhor caminho de aprendizado.{% endblock %}
 
 {% block content %}
-<div class="page-with-rail">
-    <div class="page-primary">
-        <section class="hero" aria-labelledby="titulo-catalogo">
-            <h1 id="titulo-catalogo">Aprenda no seu ritmo</h1>
-            <p class="lead">
-                Catálogo pensado para leitura rápida: nível, carga horária e descrição clara.
-                Escolha um curso, veja os detalhes e inscreva-se em segundos — sem ruído visual.
-            </p>
-            <div class="stats" role="group" aria-label="Resumo do catálogo">
-                <div class="stat">
-                    <strong>{{ total_cursos }}</strong>
-                    <span>cursos ativos</span>
-                </div>
-                <div class="stat">
-                    <strong>{{ total_horas }} h</strong>
-                    <span>carga horária total</span>
+<section class="hero-catalog" aria-labelledby="titulo-catalogo">
+    <h1 id="titulo-catalogo">Encontre o curso certo para você</h1>
+    <p class="lead">{{ total_cursos }} curso{{ total_cursos|pluralize }} disponíve{{ total_cursos|pluralize:"l,is" }} · Filtre por nível, categoria ou pesquise pelo nome.</p>
+
+    {# Busca + filtros #}
+    <form class="search-form" method="get" action="" role="search" id="filtros">
+        <div class="search-row">
+            <label for="q" class="sr-only">Pesquisar cursos</label>
+            <div class="search-input-wrap">
+                <svg class="search-icon" aria-hidden="true" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <circle cx="9" cy="9" r="6"/><path d="m15 15 3 3"/>
+                </svg>
+                <input
+                    type="search"
+                    id="q"
+                    name="q"
+                    class="input search-input"
+                    value="{{ q }}"
+                    placeholder="Pesquisar cursos…"
+                    autocomplete="off"
+                >
+            </div>
+            <button type="submit" class="btn btn-primary">Pesquisar</button>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-group">
+                <span class="filter-label">Nível:</span>
+                <div class="filter-chips" role="group" aria-label="Filtrar por nível">
+                    <a href="?q={{ q }}&categoria={{ categoria_sel }}&ordem={{ ordem_sel }}"
+                       class="chip-filter {% if not nivel_sel %}chip-filter-active{% endif %}">Todos</a>
+                    <a href="?q={{ q }}&nivel=iniciante&categoria={{ categoria_sel }}&ordem={{ ordem_sel }}"
+                       class="chip-filter chip-iniciante {% if nivel_sel == 'iniciante' %}chip-filter-active{% endif %}">Iniciante</a>
+                    <a href="?q={{ q }}&nivel=intermediario&categoria={{ categoria_sel }}&ordem={{ ordem_sel }}"
+                       class="chip-filter chip-intermediario {% if nivel_sel == 'intermediario' %}chip-filter-active{% endif %}">Intermediário</a>
+                    <a href="?q={{ q }}&nivel=avancado&categoria={{ categoria_sel }}&ordem={{ ordem_sel }}"
+                       class="chip-filter chip-avancado {% if nivel_sel == 'avancado' %}chip-filter-active{% endif %}">Avançado</a>
                 </div>
             </div>
-        </section>
 
-        <section id="catalogo" class="catalog-block" aria-labelledby="secao-cursos">
-            <div class="section-title">
-                <h2 id="secao-cursos">Catálogo</h2>
-                <p class="hint">Abra o curso para ver o programa completo e o formulário de inscrição.</p>
-            </div>
-
-            {% if cursos %}
-                <div class="course-grid">
-                    {% for curso in cursos %}
-                        <article class="card">
-                            <div class="card-top">
-                                <span class="pill pill-nivel-{{ curso.nivel }}">{{ curso.get_nivel_display }}</span>
-                                <span class="horas" title="Carga horária">{{ curso.carga_horaria }} h</span>
-                            </div>
-                            <h3><a href="{{ curso.get_absolute_url }}">{{ curso.titulo }}</a></h3>
-                            <div class="card-body">
-                                <p>{{ curso.descricao }}</p>
-                            </div>
-                            <div class="card-footer card-footer-split">
-                                <span class="meta">{{ curso.carga_horaria }} h · {{ curso.get_nivel_display }}</span>
-                                <div class="card-actions">
-                                    <a class="btn" href="{{ curso.get_absolute_url }}#inscricao">Inscrever-me</a>
-                                    <a class="btn btn-primary" href="{{ curso.get_absolute_url }}">Ver curso</a>
-                                </div>
-                            </div>
-                        </article>
+            {% if categorias %}
+            <div class="filter-group">
+                <span class="filter-label">Categoria:</span>
+                <div class="filter-chips" role="group" aria-label="Filtrar por categoria">
+                    <a href="?q={{ q }}&nivel={{ nivel_sel }}&ordem={{ ordem_sel }}"
+                       class="chip-filter {% if not categoria_sel %}chip-filter-active{% endif %}">Todas</a>
+                    {% for cat in categorias %}
+                        <a href="?q={{ q }}&nivel={{ nivel_sel }}&categoria={{ cat.slug }}&ordem={{ ordem_sel }}"
+                           class="chip-filter {% if categoria_sel == cat.slug %}chip-filter-active{% endif %}">{{ cat.nome }}</a>
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="empty">
-                    <p><strong>Catálogo em atualização.</strong></p>
-                    <p>Volte em breve — novos cursos serão publicados aqui.</p>
-                </div>
+            </div>
             {% endif %}
-        </section>
 
-        <section id="como-funciona" class="trust-block" aria-labelledby="titulo-como">
-            <h2 id="titulo-como" class="trust-title">Como funciona a inscrição</h2>
-            <ol class="steps">
-                <li><span class="step-num">1</span> Escolha o curso no catálogo e abra a página de detalhes.</li>
-                <li><span class="step-num">2</span> No painel à direita, use a aba <strong>Inscrever-se</strong> e envie o formulário.</li>
-                <li><span class="step-num">3</span> Receberá confirmação na tela; o contacto por e-mail segue o fluxo da instituição.</li>
-            </ol>
-        </section>
+            <div class="filter-group filter-group-right">
+                <label for="ordem" class="filter-label">Ordenar:</label>
+                <select id="ordem" name="ordem" class="select-sort" onchange="this.form.submit()">
+                    <option value="destaque" {% if ordem_sel == 'destaque' %}selected{% endif %}>Em destaque</option>
+                    <option value="avaliacao" {% if ordem_sel == 'avaliacao' %}selected{% endif %}>Melhor avaliados</option>
+                    <option value="recente" {% if ordem_sel == 'recente' %}selected{% endif %}>Mais recentes</option>
+                    <option value="horas" {% if ordem_sel == 'horas' %}selected{% endif %}>Maior carga horária</option>
+                    <option value="titulo" {% if ordem_sel == 'titulo' %}selected{% endif %}>A–Z</option>
+                </select>
+                <input type="hidden" name="q" value="{{ q }}">
+                <input type="hidden" name="nivel" value="{{ nivel_sel }}">
+                <input type="hidden" name="categoria" value="{{ categoria_sel }}">
+            </div>
+        </div>
+    </form>
+</section>
+
+<section id="catalogo" class="catalog-section" aria-labelledby="secao-cursos">
+    <div class="section-header">
+        <h2 id="secao-cursos" class="section-h2">
+            {% if q %}Resultados para "{{ q }}"{% else %}Catálogo{% endif %}
+            <span class="count-badge">{{ total_cursos }}</span>
+        </h2>
+        {% if q or nivel_sel or categoria_sel %}
+            <a href="{% url 'cursos:lista' %}" class="clear-filters">✕ Limpar filtros</a>
+        {% endif %}
     </div>
 
-    <aside
-        class="rail rail-sticky"
-        data-tabs
-        data-initial-tab="visao"
-        aria-label="Informações e navegação rápida"
-    >
-        <div class="tablist" role="tablist" aria-orientation="horizontal">
-            <button type="button" class="tab-btn is-active" role="tab" id="tab-lista-visao" aria-selected="true" aria-controls="panel-lista-visao" data-tab="visao">Visão geral</button>
-            <button type="button" class="tab-btn" role="tab" id="tab-lista-links" aria-selected="false" aria-controls="panel-lista-links" data-tab="links" tabindex="-1">Acesso rápido</button>
-            <button type="button" class="tab-btn" role="tab" id="tab-lista-dicas" aria-selected="false" aria-controls="panel-lista-dicas" data-tab="dicas" tabindex="-1">Dicas</button>
+    {% if cursos %}
+        <div class="course-grid">
+            {% for curso in cursos %}
+                <article class="card" id="curso-{{ curso.slug }}">
+                    <a class="card-thumb-link" href="{{ curso.get_absolute_url }}" tabindex="-1" aria-hidden="true">
+                        <div class="card-thumb card-thumb-gradient nivel-{{ curso.nivel }}">
+                            <span class="card-thumb-initial">{{ curso.titulo|slice:":1" }}</span>
+                            {% if curso.destaque %}
+                                <span class="badge-destaque">★ Destaque</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                    <div class="card-body-wrap">
+                        <div class="card-top">
+                            <span class="pill pill-nivel-{{ curso.nivel }}">{{ curso.get_nivel_display }}</span>
+                            <span class="horas">{{ curso.carga_horaria }} h</span>
+                        </div>
+                        <h3 class="card-title"><a href="{{ curso.get_absolute_url }}">{{ curso.titulo }}</a></h3>
+                        {% if curso.instrutor %}
+                            <p class="card-instrutor">{{ curso.instrutor.nome }}</p>
+                        {% endif %}
+                        {% if curso.categoria %}
+                            <p class="card-categoria">{{ curso.categoria.nome }}</p>
+                        {% endif %}
+                        <p class="card-desc">{{ curso.descricao|truncatechars:110 }}</p>
+
+                        <div class="card-meta-row">
+                            {% if curso.avaliacao > 0 %}
+                                <div class="card-rating" title="Avaliação: {{ curso.avaliacao }}/5">
+                                    {% with r=curso.avaliacao_inteira %}
+                                        {% for i in "12345" %}
+                                            <span class="star {% if forloop.counter <= r %}star-on{% endif %}">★</span>
+                                        {% endfor %}
+                                    {% endwith %}
+                                    <span class="rating-num">{{ curso.avaliacao }}</span>
+                                    {% if curso.total_alunos > 0 %}
+                                        <span class="alunos-count">({{ curso.total_alunos }} alunos)</span>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-footer-row">
+                            <span class="card-preco {% if not curso.preco %}preco-gratis{% endif %}">{{ curso.preco_display }}</span>
+                            <a class="btn btn-primary btn-sm" href="{{ curso.get_absolute_url }}">Ver curso →</a>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
         </div>
-        <div class="rail-panel-wrap">
-            <div class="rail-panel is-active" id="panel-lista-visao" role="tabpanel" aria-labelledby="tab-lista-visao" data-panel="visao">
-                <p class="rail-kicker">Resumo</p>
-                <p class="rail-lead">{{ total_cursos }} cursos · {{ total_horas }} horas de conteúdo.</p>
-                <p class="rail-muted">Interface em tema escuro com foco em legibilidade e hierarquia. Use o catálogo à esquerda para explorar.</p>
-            </div>
-            <div class="rail-panel" id="panel-lista-links" role="tabpanel" aria-labelledby="tab-lista-links" data-panel="links" hidden>
-                <p class="rail-kicker">Cursos</p>
-                {% if cursos %}
-                    <ul class="rail-links">
-                        {% for curso in cursos %}
-                            <li><a href="{{ curso.get_absolute_url }}">{{ curso.titulo }}</a><span class="rail-meta">{{ curso.carga_horaria }} h</span></li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="rail-muted">Nenhum curso listado ainda.</p>
-                {% endif %}
-            </div>
-            <div class="rail-panel" id="panel-lista-dicas" role="tabpanel" aria-labelledby="tab-lista-dicas" data-panel="dicas" hidden>
-                <p class="rail-kicker">Experiência</p>
-                <ul class="rail-bullets">
-                    <li>Prefira preencher o e-mail que você usa no dia a dia.</li>
-                    <li>Na página do curso, o painel direito reúne resumo e inscrição.</li>
-                    <li>Use <kbd class="kbd">Tab</kbd> para navegar entre abas com o teclado.</li>
-                </ul>
-            </div>
+
+        {# Paginação #}
+        {% if page_obj.has_other_pages %}
+        <nav class="pagination" aria-label="Paginação">
+            {% if page_obj.has_previous %}
+                <a class="page-btn" href="?q={{ q }}&nivel={{ nivel_sel }}&categoria={{ categoria_sel }}&ordem={{ ordem_sel }}&page={{ page_obj.previous_page_number }}">← Anterior</a>
+            {% else %}
+                <span class="page-btn page-btn-disabled">← Anterior</span>
+            {% endif %}
+
+            <span class="page-info">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+                <a class="page-btn" href="?q={{ q }}&nivel={{ nivel_sel }}&categoria={{ categoria_sel }}&ordem={{ ordem_sel }}&page={{ page_obj.next_page_number }}">Próxima →</a>
+            {% else %}
+                <span class="page-btn page-btn-disabled">Próxima →</span>
+            {% endif %}
+        </nav>
+        {% endif %}
+    {% else %}
+        <div class="empty">
+            <div class="empty-icon">🔍</div>
+            <p><strong>Nenhum curso encontrado.</strong></p>
+            <p>Tente outros termos ou <a href="{% url 'cursos:lista' %}">veja todos os cursos</a>.</p>
         </div>
-    </aside>
-</div>
+    {% endif %}
+</section>
 {% endblock %}
+
